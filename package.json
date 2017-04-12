@@ -21,7 +21,7 @@
   "author": "Philipp Hecht",
   "license": "MIT",
   "peerDependencies": {
-    "react-native": "^0.39.2"
+    "react-native": "^0.42.3"
   },
   "repository": {
     "type": "git",
