@@ -47,11 +47,11 @@ RCT_EXPORT_METHOD(openDoc:(NSArray *)array callback:(RCTResponseSenderBlock)call
         NSURL* url = [NSURL URLWithString:[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
         NSData* dat = [NSData dataWithContentsOfURL:url];
         RCTLogInfo(@"Url %@", url);
-        //From Internet
+        //From the www
         if ([urlStr containsString:@"http"]) {
             if (dat == nil) {
                 if (callback) {
-                    callback(@[[NSNull null], @"DATA nil"]);
+                    callback(@[[NSNull null], @"Doc Url not found"]);
                 }
                 return;
             }
@@ -61,6 +61,7 @@ RCT_EXPORT_METHOD(openDoc:(NSArray *)array callback:(RCTResponseSenderBlock)call
             if([fileExt length] == 0){
                 fileName = [NSString stringWithFormat:@"%@%@", fileName, @".pdf"];
             }
+
             NSString* path = [NSTemporaryDirectory() stringByAppendingPathComponent: fileName];
             NSURL* tmpFileUrl = [[NSURL alloc] initFileURLWithPath:path];
             [dat writeToURL:tmpFileUrl atomically:YES];
@@ -69,6 +70,7 @@ RCT_EXPORT_METHOD(openDoc:(NSArray *)array callback:(RCTResponseSenderBlock)call
             //Local File
             NSString* fileName = [url lastPathComponent];
             NSString* fileExt = [fileName pathExtension];
+            //NSString* fileName = [NSString stringWithFormat:@"%@%@%@", fileName, @".", filetype];
             RCTLogInfo(@"Pretending to create an event at %@", fileExt);
             if([fileExt length] == 0){
                 fileName = [NSString stringWithFormat:@"%@%@", fileName, @".pdf"];
@@ -91,6 +93,61 @@ RCT_EXPORT_METHOD(openDoc:(NSArray *)array callback:(RCTResponseSenderBlock)call
         
     });
 }
+
+
+/**
+ * BinaryinUrl
+ * open Url with a Binary String
+ * Parameters: NSArray
+ */
+RCT_EXPORT_METHOD(openDocBinaryinUrl:(NSArray *)array callback:(RCTResponseSenderBlock)callback)
+{
+    __weak RNReactNativeDocViewer* weakSelf = self;
+    dispatch_queue_t asyncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_async(asyncQueue, ^{
+        NSDictionary* dict = [array objectAtIndex:0];
+        NSString* url = dict[@"url"];
+        NSString* filename = dict[@"fileName"];
+        NSString* filetype = dict[@"fileType"];
+        NSArray* splitUrl = [url componentsSeparatedByString: @"/"];
+        NSString* binaryString = [splitUrl lastObject];
+        //Parse the Binary from URL
+        NSData* byteArrayString = [binaryString dataUsingEncoding:NSUTF8StringEncoding];
+        NSString* base64Encoded = [byteArrayString base64EncodedStringWithOptions:0];
+        NSURL *urlbinary = [NSURL URLWithString:[NSString stringWithFormat:@"data:application/octet-stream;base64,%@",base64Encoded]];
+        NSData* dat = [NSData dataWithContentsOfURL:urlbinary];
+
+        if (dat == nil) {
+            if (callback) {
+                callback(@[[NSNull null], @"DATA nil"]);
+            }
+            return;
+        }
+        NSString* fileName = [NSString stringWithFormat:@"%@%@%@", filename, @".", filetype];
+        NSString* fileExt = [fileName pathExtension];
+        if([fileExt length] == 0){
+            fileName = [NSString stringWithFormat:@"%@%@", fileName, @".pdf"];
+        }
+        NSString* path = [NSTemporaryDirectory() stringByAppendingPathComponent: fileName];
+        NSURL* tmpFileUrl = [[NSURL alloc] initFileURLWithPath:path];
+
+        [dat writeToURL:tmpFileUrl atomically:YES];
+        weakSelf.fileUrl = tmpFileUrl;
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            QLPreviewController* cntr = [[QLPreviewController alloc] init];
+            cntr.delegate = weakSelf;
+            cntr.dataSource = weakSelf;
+            if (callback) {
+                callback(@[[NSNull null], @"Data"]);
+            }
+            UIViewController* root = [[[UIApplication sharedApplication] keyWindow] rootViewController];
+            [root presentViewController:cntr animated:YES completion:nil];
+        });
+        
+    });
+}
+
 /**
  * openDocb64
  * open Base64 String
@@ -138,6 +195,7 @@ RCT_EXPORT_METHOD(openDocb64:(NSArray *)array callback:(RCTResponseSenderBlock)c
         
     });
 }
+
 
 //Movie Files mp4
 RCT_EXPORT_METHOD(playMovie:(NSString *)file callback:(RCTResponseSenderBlock)callback)

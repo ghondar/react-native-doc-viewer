@@ -10,12 +10,13 @@ A React Native bridge module: Document Viewer for files (pdf, png, jpg, xls, doc
 Changelog:
 
 ```
+2.3.8  -  Method openDocBinaryinUrl for Binary in Url
+
 2.3.2   - Video Player mp4 IOS
 
 2.2.4   - Base64 String Support for IOS
 
-2.2.3
-        - Android Doc Viewer Implementation. At the moment you have to install a Application that supports the Format
+2.2.3 - Android Doc Viewer Implementation. At the moment you have to install a Application that supports the Format
 
 ```
 
@@ -77,8 +78,13 @@ Changelog:
 ## Usage
 ```javascript
 import OpenFile from 'react-native-doc-viewer';
+var RNFS = require('react-native-fs');
+var SavePath = Platform.OS === 'ios' ? RNFS.MainBundlePath : RNFS.DocumentDirectoryPath;
 
-  //Handle Function Internet
+  /*
+  * Handle WWW File Method
+  * fileType Default == "" you can use it, to set the File Extension (pdf,doc,xls,ppt etc) when in the Url the File Extension is missing.
+  */
   handlePress = () => {
    OpenFile.openDoc([{
      url:"http://www.snee.com/xml/xslt/sample.doc",
@@ -91,12 +97,34 @@ import OpenFile from 'react-native-doc-viewer';
       }
     })
   }
+
+  /*
+  * Binary in URL
+  * Binary String in Url
+  * fileType Default == "" you can use it, to set the File Extension (pdf,doc,xls,ppt etc) when in the Url you dont have an File Extensions
+  */
+  handlePressBinaryinUrl = () => {
+   OpenFile.openDocBinaryinUrl([{
+     url:"http://mail.hartl-haus.at/uploads/tx_hhhouses/{binaryString}",
+     fileName:"sample",
+     fileType:"jpg"
+   }], (error, url) => {
+      if (error) {
+        console.error(error);
+      } else {
+        console.log(url)
+      }
+    })
+  }
   
-  //Handle Function Local File
-  handlePress = () => {
+  /*
+  * Handle local File Method
+  * fileType Default == "" you can use it, to set the File Extension (pdf,doc,xls,ppt etc) when in the Url you dont have an File Extensions
+  */
+  handlePressLocalFile = () => {
     OpenFile.openDoc([{
-     url:"{Path/to/the/document}",
-     fileName:"sample"
+     url:SavePath+"filename.pdf",
+     fileName:"sample",
    }], (error, url) => {
       if (error) {
         console.error(error);
@@ -106,13 +134,16 @@ import OpenFile from 'react-native-doc-viewer';
     })
   }
 
-  //Base64String
-  //put only the base64 String without data:application/octet-stream;base64
+  /*
+  * Base64String
+  * put only the base64 String without data:application/octet-stream;base64
+  * fileType Default == "" you can use it, to set the File Extension (pdf,doc,xls,ppt etc) when in the Url you dont have an File Extensions
+  */
   handlePressb64 = () => {
     OpenFile.openDocb64([{
       base64:"{BASE64String}"
       fileName:"sample.png",
-      fileType:"png"
+      fileType:""
     }], (error, url) => {
         if (error) {
           console.error(error);

@@ -10,14 +10,21 @@ import {
   StyleSheet,
   Text,
   View,
-  Button
+  Button,
+  Platform
 } from 'react-native';
 import OpenFile from 'react-native-doc-viewer';
+var RNFS = require('react-native-fs');
+var SavePath = Platform.OS === 'ios' ? RNFS.MainBundlePath : RNFS.DocumentDirectoryPath;
 export default class DocViewerExample extends Component {
+  /*
+  * Handle WWW File Method
+  * fileType Default == "" you can use it, to set the File Extension (pdf,doc,xls,ppt etc) when in the Url the File Extension is missing.
+  */
   handlePress = () => {
    OpenFile.openDoc([{
      url:"http://mail.hartl-haus.at/uploads/tx_hhhouses/htf13_classic153s(3_giebel_haus).jpg",
-     fileName:"sample"
+     fileName:"sample",
    }], (error, url) => {
       if (error) {
         console.error(error);
@@ -26,6 +33,7 @@ export default class DocViewerExample extends Component {
       }
     })
   }
+  
   render() {
     return (
       <View style={styles.container}>
