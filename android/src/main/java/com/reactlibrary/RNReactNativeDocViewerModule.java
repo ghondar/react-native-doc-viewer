@@ -58,7 +58,7 @@ public class RNReactNativeDocViewerModule extends ReactContextBaseJavaModule {
   public String getName() {
     return "RNReactNativeDocViewer";
   }
-    
+
   @ReactMethod
   public void openDoc(ReadableArray args, Callback callback) {
       final ReadableMap arg_object = args.getMap(0);
@@ -76,7 +76,7 @@ public class RNReactNativeDocViewerModule extends ReactContextBaseJavaModule {
             callback.invoke(e.getMessage());
        }
   }
-    
+
     // used for all downloaded files, so we can find and delete them again.
     private final static String FILE_TYPE_PREFIX = "PP_";
     /**
@@ -163,12 +163,12 @@ public class RNReactNativeDocViewerModule extends ReactContextBaseJavaModule {
 
         return mimeType;
     }
-    
+
   private class FileDownloaderAsyncTask extends AsyncTask<Void, Void, File> {
         private final Callback callback;
         private final String url;
         private final String fileName;
-       
+
         public FileDownloaderAsyncTask(Callback callback,
                 String url, String fileName) {
             super();
@@ -205,9 +205,9 @@ public class RNReactNativeDocViewerModule extends ReactContextBaseJavaModule {
                 intent.setDataAndType(Uri.fromFile(result), mimeType);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
-          
+
                 // Thread-safe.
-                callback.invoke(fileName);
+                callback.invoke(result.getPath());
             } catch (ActivityNotFoundException e) {
                 System.out.println("ERROR");
                 System.out.println(e.getMessage());
