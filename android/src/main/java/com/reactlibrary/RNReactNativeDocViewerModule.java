@@ -207,7 +207,7 @@ public class RNReactNativeDocViewerModule extends ReactContextBaseJavaModule {
                 context.startActivity(intent);
 
                 // Thread-safe.
-                callback.invoke(result.getPath());
+                callback.invoke(null, result.getPath());
             } catch (ActivityNotFoundException e) {
                 System.out.println("ERROR");
                 System.out.println(e.getMessage());
